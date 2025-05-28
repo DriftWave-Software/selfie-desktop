@@ -454,9 +454,36 @@ class CameraTestView(ft.View):
             if self.latest_frame is not None:
                 # Create output directory if it doesn't exist
                 import os
-                output_dir = os.path.join(os.path.expanduser("~"), "SelfieBooth_Media")
-                os.makedirs(output_dir, exist_ok=True)
+                import platform
                 
+                # On iOS simulator, we need to use a different directory structure
+                is_ios = platform.system() == "Darwin" and (os.path.exists("/var/mobile") or "/CoreSimulator/" in os.getcwd())
+                
+                if is_ios:
+                    # Use the app's Documents directory for iOS
+                    if "/CoreSimulator/" in os.getcwd():
+                        # For simulator
+                        output_dir = os.path.join(os.getcwd(), "Documents", "SelfieBooth_Media")
+                    else:
+                        # For real device
+                        output_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "Documents", "SelfieBooth_Media")
+                    print(f"iOS media storage path: {output_dir}")
+                else:
+                    # Standard path for desktop
+                    output_dir = os.path.join(os.path.expanduser("~"), "SelfieBooth_Media")
+                
+                # Create the directory with appropriate permissions
+                try:
+                    os.makedirs(output_dir, exist_ok=True)
+                    print(f"Created/verified media directory: {output_dir}")
+                except Exception as e:
+                    print(f"Warning: Could not create media directory: {e}")
+                    # Fall back to temporary directory
+                    import tempfile
+                    output_dir = os.path.join(tempfile.gettempdir(), "SelfieBooth_Media")
+                    os.makedirs(output_dir, exist_ok=True)
+                    print(f"Using fallback media directory: {output_dir}")
+                    
                 # Create filename with timestamp
                 import datetime
                 timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
@@ -485,8 +512,35 @@ class CameraTestView(ft.View):
         if not self.is_recording:
             try:
                 # Create output directory if it doesn't exist
-                output_dir = os.path.join(os.path.expanduser("~"), "SelfieBooth_Media")
-                os.makedirs(output_dir, exist_ok=True)
+                import platform
+                
+                # On iOS simulator, we need to use a different directory structure
+                is_ios = platform.system() == "Darwin" and (os.path.exists("/var/mobile") or "/CoreSimulator/" in os.getcwd())
+                
+                if is_ios:
+                    # Use the app's Documents directory for iOS
+                    if "/CoreSimulator/" in os.getcwd():
+                        # For simulator
+                        output_dir = os.path.join(os.getcwd(), "Documents", "SelfieBooth_Media")
+                    else:
+                        # For real device
+                        output_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "Documents", "SelfieBooth_Media")
+                    print(f"iOS media storage path: {output_dir}")
+                else:
+                    # Standard path for desktop
+                    output_dir = os.path.join(os.path.expanduser("~"), "SelfieBooth_Media")
+                
+                # Create the directory with appropriate permissions
+                try:
+                    os.makedirs(output_dir, exist_ok=True)
+                    print(f"Created/verified media directory: {output_dir}")
+                except Exception as e:
+                    print(f"Warning: Could not create media directory: {e}")
+                    # Fall back to temporary directory
+                    import tempfile
+                    output_dir = os.path.join(tempfile.gettempdir(), "SelfieBooth_Media")
+                    os.makedirs(output_dir, exist_ok=True)
+                    print(f"Using fallback media directory: {output_dir}")
                 
                 # Create filename with timestamp
                 timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")

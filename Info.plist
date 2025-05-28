@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>NSCameraUsageDescription</key>
+    <string>SelfieBooth needs access to your camera to take photos and videos</string>
+    <key>NSMicrophoneUsageDescription</key>
+    <string>SelfieBooth needs access to your microphone to record videos with sound</string>
+    <key>NSPhotoLibraryUsageDescription</key>
+    <string>SelfieBooth needs access to your photo library to save photos and videos</string>
+    <key>NSPhotoLibraryAddUsageDescription</key>
+    <string>SelfieBooth needs access to your photo library to save photos and videos</string>
+    <key>NSLocalNetworkUsageDescription</key>
+    <string>SelfieBooth needs access to your local network for debug services</string>
+    <key>UIFileSharingEnabled</key>
+    <true/>
+    <key>LSSupportsOpeningDocumentsInPlace</key>
+    <true/>
+</dict>
+</plist>
