@@ -192,7 +192,7 @@ class CameraTestView(ft.View):
                         ft.Text("\nPlease allow these permissions when prompted.", size=16),
                     ], tight=True, spacing=10),
                     actions=[
-                        ft.TextButton("OK", on_click=lambda e: self.page.dialog.open = False),
+                        ft.TextButton("OK", on_click=self._close_dialog),
                     ],
                     on_dismiss=lambda e: self._request_ios_permissions(),
                 )
@@ -207,6 +207,13 @@ class CameraTestView(ft.View):
             self.page.update(self.status_text)
             # Start camera directly without using controller
             threading.Thread(target=self._direct_camera_preview, daemon=True).start()
+    
+    def _close_dialog(self, e):
+        """Close the dialog and proceed with permission requests"""
+        if hasattr(self, "page") and hasattr(self.page, "dialog"):
+            self.page.dialog.open = False
+            self.page.update()
+        self._request_ios_permissions()
     
     def _request_ios_permissions(self):
         """Request iOS permissions with appropriate UI feedback"""
