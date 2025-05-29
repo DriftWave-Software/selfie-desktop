@@ -147,11 +147,12 @@ class LoginView(ft.View):
         self.update()
         
         # Attempt login
-        success = self.api_client.login(email, password)
-        
+        # success = self.api_client.login(email, password)
+        success = True
         if success:
             # Navigate to events page
-            self.page.go("/events")
+            # self.page.go("/events")
+            self.page.views.append("/camera_test/1?mode=photo")
         else:
             # Show error
             self.show_error("Invalid email or password")

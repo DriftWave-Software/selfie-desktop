@@ -4,9 +4,11 @@ import time
 import os
 import base64
 import cv2
+import platform
 from src.utils.api_client import APIClient
 from src.components.topbar import TopBar
 from src.controllers.camera_controller import CameraController
+from src.utils.ios_permissions import IOSPermissions, is_ios, get_device_type
 
 class CameraTestView(ft.View):
     def __init__(self, page: ft.Page, api_client: APIClient, event_id: str, mode: str = "photo"):
@@ -160,14 +162,85 @@ class CameraTestView(ft.View):
     
     def did_mount(self, e=None):
         """Called when the view is mounted"""
-        print("CameraTestView mounted, initializing camera...")
+        print("CameraTestView mounted, checking permissions...")
         
         # Update status
-        self.status_text.value = "Initializing camera..."
+        self.status_text.value = "Checking permissions..."
         self.page.update(self.status_text)
         
-        # Start camera directly without using controller
-        threading.Thread(target=self._direct_camera_preview, daemon=True).start()
+        # On iOS/iPadOS, request permissions first
+        if is_ios():
+            device_type = get_device_type()
+            is_ipad = "iPad" in device_type
+            
+            # Create permission request UI with device-specific messaging
+            permission_title = f"Permission Required on {device_type}"
+            self.status_text.value = f"Requesting camera permissions on {device_type}..."
+            self.status_text.size = 20 if is_ipad else 16  # Larger text on iPad
+            self.page.update(self.status_text)
+            
+            # Show permission instruction dialog for iPad
+            if is_ipad:
+                # iPad often shows permission dialogs differently, provide extra guidance
+                self.page.dialog = ft.AlertDialog(
+                    title=ft.Text(permission_title),
+                    content=ft.Column([
+                        ft.Text("SelfieBooth needs access to your:"),
+                        ft.Text("• Camera - to take photos", size=16),
+                        ft.Text("• Microphone - to record audio with videos", size=16),
+                        ft.Text("• Photo Library - to save media", size=16),
+                        ft.Text("\nPlease allow these permissions when prompted.", size=16),
+                    ], tight=True, spacing=10),
+                    actions=[
+                        ft.TextButton("OK", on_click=lambda e: self.page.dialog.open = False),
+                    ],
+                    on_dismiss=lambda e: self._request_ios_permissions(),
+                )
+                self.page.dialog.open = True
+                self.page.update()
+            else:
+                # Standard flow for iPhone
+                self._request_ios_permissions()
+        else:
+            # Non-iOS platforms - proceed directly
+            self.status_text.value = "Initializing camera..."
+            self.page.update(self.status_text)
+            # Start camera directly without using controller
+            threading.Thread(target=self._direct_camera_preview, daemon=True).start()
+    
+    def _request_ios_permissions(self):
+        """Request iOS permissions with appropriate UI feedback"""
+        device_type = get_device_type()
+        
+        def on_permissions_result(results):
+            print(f"Permission results on {device_type}: {results}")
+            if results.get("camera") == "granted":
+                self.status_text.value = f"Camera permission granted on {device_type}, initializing..."
+                self.page.update(self.status_text)
+                # Start camera initialization
+                threading.Thread(target=self._direct_camera_preview, daemon=True).start()
+            else:
+                self.status_text.value = f"Camera permission denied on {device_type}. Cannot proceed."
+                self.status_text.color = "red"
+                
+                # Add instructions for enabling permissions in Settings
+                settings_instructions = ft.Column([
+                    ft.Text("To enable camera access:", size=16),
+                    ft.Text("1. Open Settings on your device", size=14),
+                    ft.Text("2. Find and tap on SelfieBooth", size=14),
+                    ft.Text("3. Enable Camera, Microphone and Photos access", size=14),
+                    ft.Text("4. Return to SelfieBooth app", size=14),
+                    ft.ElevatedButton("Try Again", on_click=lambda _: self.did_mount()),
+                ], spacing=10)
+                
+                # Add settings instructions to UI
+                if hasattr(self, "preview_container") and self.preview_container:
+                    self.preview_container.content = settings_instructions
+                    
+                self.page.update()
+        
+        # Request all permissions (camera, microphone, photo library)
+        IOSPermissions.request_all_permissions(on_permissions_result)
         
     def _initialize_camera(self):
         """Initialize camera in background thread"""

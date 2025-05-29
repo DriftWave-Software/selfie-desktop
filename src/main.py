@@ -270,7 +270,8 @@ def main(page: ft.Page):
     # Start directly with camera test page for testing
     print("Opening camera test page directly")
     # Using event_id=1 as a default placeholder for testing
-    page.go("/camera_test/1?mode=photo")
+    # page.go("/camera_test/1?mode=photo")
+    page.go("/")
 
 
 # Check if assets folder exists for development vs packaged mode
