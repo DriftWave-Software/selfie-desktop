@@ -35,17 +35,6 @@ dependencies:
   # Use with the CupertinoIcons class for iOS style icons.
   cupertino_icons: ^1.0.8
   
-  # Camera and image processing packages
-  camera: ^0.10.5+5
-  image_picker: ^1.0.4
-  path_provider: ^2.1.1
-  image_gallery_saver: ^2.0.3
-  photo_manager: ^2.7.1
-  image: ^3.3.0
-  path: ^1.8.3
-  flutter_image_compress: ^2.0.4
-  photofilters: ^3.0.1
-  permission_handler: ^11.0.1
 
 dev_dependencies:
   flutter_test:
